@@ -54,7 +54,7 @@ sub printIntro {
 		die "Please move the installer into the directory you want to install into.\n";
 	}
 	my $thisUser = getlogin;
-	my $userAnswer = &checkyN("Please confirm you want to install this into $thisUser's crontab");
+	my $userAnswer = &checkyN("Please confirm you want to install this into $thisUser" . "'s crontab");
 	if ($userAnswer == 0) {
 		die "Please run the installer as the user you want it to run as.\n";
 	}
@@ -107,7 +107,7 @@ sub deriveProjectName {
 
 sub deployCleanup {
 	my $delete = &checkYn("Delete installer '$0'?");
-	if ($delete) {
+	if ($delete && $debug == 0) {
 		unlink $0;
 	}
 
