@@ -43,7 +43,7 @@ sub processArguments {
 		&setupUpdateChecks;
 		&deployCleanup;
 	} elsif ($processedArguments{'update'} == 1) {
-		## start udpate here
+		## start update here
 	}
 
 
