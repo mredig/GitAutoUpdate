@@ -129,9 +129,10 @@ sub deriveProjectName {
 }
 
 sub deployCleanup {
-	my $delete = &checkYn("Delete installer '$0'?");
+	my $fullExecPath = abs_path($0);
+	my $delete = &checkYn("Delete installer '$fullExecPath'?");
 	if ($delete && $debug == 0) {
-		unlink $0;
+		unlink $fullExecPath;
 	}
 
 }
