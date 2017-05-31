@@ -152,3 +152,20 @@ sub checkyN { ## provided a prompt, will ask user how to proceed, assuming NO an
 	}
 	return $rVal;
 }
+
+sub checkYn { ## provided a prompt, will ask user how to proceed, assuming YES and else opting yes
+	my $prompt = $_[0] . " [Y/n]:";
+	print "$prompt";
+	my $rVal = -1;
+	while($rVal == -1) {
+		chomp(my $yn = <STDIN>);
+		if ($yn =~ /^y*$/i) {
+		 	$rVal = 1;
+		} elsif ($yn =~ /^n+$/i) {
+			$rVal = 0;
+		} else {
+			print "Sorry, that's not valid input. Please try again:\n\n$prompt";
+		}
+	}
+	return $rVal;
+}
