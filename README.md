@@ -4,6 +4,7 @@
 
 1. Copy `git_auto_update` into your repository
 1. Edit your copy's first variables and enter your repo location and cron timer for updates
+	* use `https` for security over `ssh` (if client gets compromised, ssh could allow access for hackers to server and even worse, could then compromise the main repo)
 	* conforms to cron's rules, but adds the ability to randomize values:
 		* `r0-59 * * * *` will run every hour of every day at a random minute value
 		* `r0-29 r0-23 * * *` will run once every day at a random hour at a random minute on the first half of the hour

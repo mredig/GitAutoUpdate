@@ -44,6 +44,10 @@ sub processArguments {
 		&deployCleanup;
 	} elsif ($processedArguments{'update'} == 1) {
 		## start update here
+		&chdirToRepo;
+		&runPreflightScript;
+		&gitPull;
+		&runPostflightScript;
 	}
 
 
@@ -67,6 +71,24 @@ sub processArgument {
 		$value = 1;
 	}
 	return ($key, $value);
+}
+
+## UPGRADE / GIT PULL
+
+sub chdirToRepo {
+
+}
+
+sub runPreflightScript {
+
+}
+
+sub gitPull {
+	## also update submodules
+}
+
+sub runPostflightScript {
+
 }
 
 ## INSTALL AND DEPLOY
