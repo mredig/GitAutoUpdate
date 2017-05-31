@@ -19,31 +19,57 @@ sub main {
 
 sub processArguments {
 	$processedArgument = 0;
+	my %processedArguments;
 	for (my $i = 0; $i < scalar(@ARGV); $i++) {
 		my $arg = $ARGV[$i];
 		if ($arg =~ /^-(\w)/) {
 			$arg = $1;
-			&processArgument($arg, $ARGV[$i + 1]);
+			my %ironicHash = &processArgument($arg, $ARGV[$i + 1]);
+
+			# print "key: $ironicHash{'key'} value: $ironicHash{'value'}\n";
+			$processedArguments{$ironicHash{'key'}} = $ironicHash{'value'};
 		}
 	}
 	if ($processedArgument == 0) {
+		die "Usage: git_auto_update [options]\n";
+	}
+	if ($processedArguments{'debug'} == 1) {
+		$debug = 1;
+	}
+
+	if ($processedArguments{'install'} == 1) {
+		## start install here
 		&printIntro;
 		&cloneGit;
 		&deriveProjectName;
 		&setupUpdateChecks;
 		&deployCleanup;
+	} elsif ($processedArguments{'update'} == 1) {
+		## start udpate here
 	}
+
+
 }
 sub processArgument {
 	my $arg = $_[0];
 	my $nextArg = $_[1];
-	if ($arg eq "u" && $nextArg ne "") {
-		$processArgument = 1;
-		## update starter goes here
+	# my $key, $value;
+	my %ironicHash;
+	if ($arg eq "u") {
+		$processedArgument = 1;
+		$ironicHash{'key'} = "update";
+		$ironicHash{'value'} = 1;
 	} elsif ($arg eq "d") {
 		print "Debug mode\n";
-		$debug = 1;
+		$ironicHash{'key'} = "debug";
+		$ironicHash{'value'} = 1;
+	} elsif ($arg eq "i") {
+		$processedArgument = 1;
+		print "Install/Deploy mode\n";
+		$ironicHash{'key'} = "install";
+		$ironicHash{'value'} = 1;
 	}
+	return %ironicHash;
 }
 
 ## INSTALL AND DEPLOY
