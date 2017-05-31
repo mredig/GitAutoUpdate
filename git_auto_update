@@ -1,0 +1,139 @@
+#!/usr/bin/perl
+use Cwd 'abs_path';
+use File::Basename;
+use File::Move;
+
+$debug = 0;
+$originRepo = "";
+$cronTimer = "r0-59 * * * *"; ## r0-59 means random 0-59
+$thisScript = &getExecutableName;
+$thisDir = &getExecutableDirectory;
+
+&main;
+
+
+sub main {
+	&processArguments;
+}
+
+sub processArguments {
+	$processedArgument = 0;
+	for (my $i = 0; $i < scalar(@ARGV); $i++) {
+		my $arg = $ARGV[$i];
+		if ($arg =~ /^-(\w)/) {
+			$arg = $1;
+			&processArgument($arg, $ARGV[$i + 1]);
+		}
+	}
+	if ($processedArgument == 0) {
+		&printIntro;
+		&cloneGit;
+		&setupUpdateChecks;
+	}
+}
+sub processArgument {
+	my $arg = $_[0];
+	my $nextArg = $_[1];
+	if ($arg eq "u" && $nextArg ne "") {
+		$processArgument = 1;
+		## update starter goes here
+	} elsif ($arg eq "d") {
+		print "Debug mode\n";
+		$debug = 1;
+	}
+}
+
+sub printIntro {
+	my $answer = &checkyN("Please confirm you want to install into the directory '$thisDir'");
+	if ($answer == 0) {
+		die "Please move the installer into the directory you want to install into.\n";
+	}
+	my $thisUser = getlogin;
+	my $userAnswer = &checkyN("Please confirm you want to install this into $thisUser's crontab");
+	if ($userAnswer == 0) {
+		die "Please run the installer as the user you want it to run as.\n";
+	}
+}
+
+sub cloneGit {
+	if ($originRepo eq "") {
+		print "Please enter the repository link:";
+		chomp($originRepo = <STDIN>);
+	}
+
+	chdir $thisDir;
+	&runOnSystem("git clone $originRepo");
+}
+
+sub setupUpdateChecks {
+	# (crontab -l 2>/dev/null;echo '\@reboot $ufwFile') | crontab -
+	my $newCron = &calculateCronTimer;
+	my $cronEntry = "$newCron $thisDir/git_auto_update";
+	# my $cronSetCommand = "(crontab -l 2>/dev/null;echo '$cronEntry') | crontab -";
+	my $previousCron = `crontab -l`;
+	my $newCron = "$previousCron\n$cronEntry\n";
+	print "$cronSetCommand\n";
+	if ($debug) {
+		print "new Cron:\n\n";
+		print "$newCron\n";
+	} else {
+		open my $cronFH, "| crontab -" or die "can't open crontab: $!";
+		print $cronFH "$newCron";
+		close $cronFH;
+		print "updated crontab with new entry:\n$cronEntry\n";
+	}
+}
+
+sub calculateCronTimer {
+	my $newCron = $cronTimer;
+	while($newCron =~ /r(\d+)-(\d+)/) {
+		my $ranString = "r$1-$2";
+		my $lowRan = $1;
+		my $hiRan = $2;
+		my $range = $hiRan - $lowRan;
+		my $rand = int(rand($range));
+		$rand += $lowRan;
+		$newCron =~ s/$ranString/$rand/;
+	}
+	return $newCron;
+}
+
+## support subroutines
+
+sub runOnSystem { ## executes system command and communicates to user what it's doing - be sure to be careful of arbitrary code execution
+	my $command = $_[0];
+	if ($debug) {
+		print "debug: $command\n";
+	} else {
+		print "\n\n[[executing: $command]]\n\n";
+		system("$command");
+	}
+}
+
+sub getExecutableDirectory {
+	my $fullPath = abs_path($0);
+	my $dirname  = dirname($fullPath);
+	return $dirname;
+}
+
+sub getExecutableName {
+	my $name = basename($0);
+	return $name;
+}
+
+sub checkyN { ## provided a prompt, will ask user how to proceed, assuming NO and else opting yes
+	my $prompt = $_[0] . " [y/N]:";
+	print "$prompt";
+	my $rVal = -1;
+	while($rVal == -1) {
+		chomp(my $yn = <STDIN>);
+		if ($yn =~ /^y+$/i) {
+		 	$rVal = 1;
+		} elsif ($yn =~ /^n*$/i) {
+			$rVal = 0;
+		} else {
+			print "Sorry, that's not valid input. Please try again:\n\n$prompt";
+		}
+	}
+	return $rVal;
+}
