@@ -24,10 +24,8 @@ sub processArguments {
 		my $arg = $ARGV[$i];
 		if ($arg =~ /^-(\w)/) {
 			$arg = $1;
-			my %ironicHash = &processArgument($arg, $ARGV[$i + 1]);
-
-			# print "key: $ironicHash{'key'} value: $ironicHash{'value'}\n";
-			$processedArguments{$ironicHash{'key'}} = $ironicHash{'value'};
+			my ($key, $value) = &processArgument($arg, $ARGV[$i + 1]);
+			$processedArguments{$key} = $value;
 		}
 	}
 	if ($processedArgument == 0) {
@@ -53,23 +51,22 @@ sub processArguments {
 sub processArgument {
 	my $arg = $_[0];
 	my $nextArg = $_[1];
-	# my $key, $value;
-	my %ironicHash;
+	my $key, $value;
 	if ($arg eq "u") {
 		$processedArgument = 1;
-		$ironicHash{'key'} = "update";
-		$ironicHash{'value'} = 1;
+		$key = "update";
+		$value = 1;
 	} elsif ($arg eq "d") {
 		print "Debug mode\n";
-		$ironicHash{'key'} = "debug";
-		$ironicHash{'value'} = 1;
+		$key = "debug";
+		$value = 1;
 	} elsif ($arg eq "i") {
 		$processedArgument = 1;
 		print "Install/Deploy mode\n";
-		$ironicHash{'key'} = "install";
-		$ironicHash{'value'} = 1;
+		$key = "install";
+		$value = 1;
 	}
-	return %ironicHash;
+	return ($key, $value);
 }
 
 ## INSTALL AND DEPLOY
