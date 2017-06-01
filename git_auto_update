@@ -76,19 +76,27 @@ sub processArgument {
 ## UPGRADE / GIT PULL
 
 sub chdirToRepo {
-
+	chdir "$thisDir";
 }
 
 sub runPreflightScript {
-
+	if (-e "Scripts/preflight") {
+		my $fullPreflightPath = abs_path("./Scripts/preflight");
+		&runOnSystem($fullPreflightPath);
+	}
 }
 
 sub gitPull {
 	## also update submodules
+	&runOnSystem("git pull");
+	&runOnSystem("git submodule update --init --recursive")
 }
 
 sub runPostflightScript {
-
+	if (-e "Scripts/postflight") {
+		my $fullPostflightPath = abs_path("./Scripts/postflight");
+		&runOnSystem($fullPostflightPath);
+	}
 }
 
 ## INSTALL AND DEPLOY
@@ -112,6 +120,7 @@ sub cloneGit {
 	}
 	chdir $thisDir;
 	&runOnSystem("git clone $originRepo");
+	&runOnSystem("git submodule update --init --recursive")
 }
 
 sub setupUpdateChecks {
@@ -124,7 +133,7 @@ sub setupUpdateChecks {
 		print "new Cron:\n\n";
 		print "$newCron\n";
 	} else {
-		open my $cronFH, "| crontab -" or die "can't open crontab: $!";
+		open my $cronFH, "| crontab -" or die "can't open crontab: $!"; ## reference: https://stackoverflow.com/questions/18133498/how-to-use-perl-to-modify-crontab
 		print $cronFH "$newCron";
 		close $cronFH;
 		print "updated crontab with new entry:\n$cronEntry\n";
