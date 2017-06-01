@@ -49,9 +49,8 @@ sub processArguments {
 		&gitPull;
 		&runPostflightScript;
 	}
-
-
 }
+
 sub processArgument {
 	my $arg = $_[0];
 	my $nextArg = $_[1];
