@@ -19,3 +19,4 @@
 #### Notes:
 * This script assumes your repo conforms to the typical git naming scheme of `[protocol][server][path][reponame].git`
 * updating is not yet implemented, so for now this is an overpowered `git clone` command
+* don't forget that pre and postflight scripts must be executable!

@@ -9,7 +9,8 @@ $cronTimer = "r0-59 * * * *"; ## r0-59 means random 0-59
 ## dynamic
 $projectName = "";
 $thisScript = &getExecutableName;
-$thisDir = &getExecutableDirectory;
+$execDir = &getExecutableDirectory;
+$ENV{'PATH'} .= ":/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin";
 
 &main;
 
@@ -37,9 +38,10 @@ sub processArguments {
 
 	if ($processedArguments{'install'} == 1) {
 		## start install here
-		&printIntro;
-		&cloneGit;
 		&deriveProjectName;
+		&printIntro;
+		&deriveProjectName;
+		&cloneGit;
 		&setupUpdateChecks;
 		&deployCleanup;
 	} elsif ($processedArguments{'update'} == 1) {
@@ -75,7 +77,7 @@ sub processArgument {
 ## UPGRADE / GIT PULL
 
 sub chdirToRepo {
-	chdir "$thisDir";
+	chdir "$execDir";
 }
 
 sub runPreflightScript {
@@ -101,12 +103,19 @@ sub runPostflightScript {
 ## INSTALL AND DEPLOY
 
 sub printIntro {
-	my $answer = &checkyN("Please confirm you want to install into the directory '$thisDir'");
+	my $prompt;
+	if ($projectName ne "") {
+		$prompt = "Please confirm you want to install $projectName into the directory '$execDir'";
+	} else {
+		$prompt = "Please confirm you want to install into the directory '$execDir'";
+	}
+
+	my $answer = &checkyN($prompt);
 	if ($answer == 0) {
 		die "Please move the installer into the directory you want to install into.\n";
 	}
 	my $thisUser = getlogin;
-	my $userAnswer = &checkyN("Please confirm you want to install this into $thisUser" . "'s crontab");
+	my $userAnswer = &checkyN("Please confirm you want to install into $thisUser" . "'s crontab");
 	if ($userAnswer == 0) {
 		die "Please run the installer as the user you want it to run as.\n";
 	}
@@ -117,14 +126,15 @@ sub cloneGit {
 		print "Please enter the repository link:";
 		chomp($originRepo = <STDIN>);
 	}
-	chdir $thisDir;
+	chdir $execDir;
 	&runOnSystem("git clone $originRepo");
+	chdir $projectName or print "cant chdir to $projectName: $!";
 	&runOnSystem("git submodule update --init --recursive")
 }
 
 sub setupUpdateChecks {
 	my $newCron = &calculateCronTimer;
-	my $cronEntry = "$newCron $thisDir/$projectName/$thisScript";
+	my $cronEntry = "$newCron $execDir/$projectName/$thisScript -u"; #command that goes into cron
 	my $previousCron = `crontab -l`;
 	my $newCron = "$previousCron\n$cronEntry\n";
 	print "$cronSetCommand\n";
@@ -159,7 +169,7 @@ sub deriveProjectName {
 }
 
 sub deployCleanup {
-	my $fullExecPath = abs_path($0);
+	my $fullExecPath = "$execDir/$thisScript";
 	my $delete = &checkYn("Delete installer '$fullExecPath'?");
 	if ($delete && $debug == 0) {
 		unlink $fullExecPath;
