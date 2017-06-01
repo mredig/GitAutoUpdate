@@ -207,7 +207,7 @@ sub checkyN { ## provided a prompt, will ask user how to proceed, assuming NO an
 	return $rVal;
 }
 
-sub checkYn { ## provided a prompt, will ask user how to proceed, assuming YES and else opting yes
+sub checkYn { ## provided a prompt, will ask user how to proceed, assuming YES and else opting no
 	my $prompt = $_[0] . " [Y/n]:";
 	print "$prompt";
 	my $rVal = -1;
