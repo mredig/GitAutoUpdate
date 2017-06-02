@@ -225,11 +225,6 @@ sub getExecutableDirectory {
 
 sub getExecutableName {
 	my $name = basename($0);
-
-	if ($name eq "-e"){
-		die "It appears that this was deployed over the internet and not configured to handle this circumstance. Please see documentation at https://github.com/mredig/GitAutoUpdate\n";
-	}
-
 	return $name;
 }
 
