@@ -12,6 +12,7 @@ $originRepo = "";
 $cronTimer = "r0-59 * * * *"; ## r0-59 means random 0-59
 $preflightScript = "./Scripts/preflight"; #script that will run prior to checking for updates (note the relative location)
 $postflightScript = "./Scripts/postflight"; #script that will run after checking for updates
+$uninstallScript = "./Scripts/uninstall"; #script that will run when uninstall invoked (not implemented)
 $thisScript = &getExecutableName; #only change for special deployment needs
 
 
@@ -23,6 +24,7 @@ $ENV{'PATH'} .= ":/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/
 &main;
 
 sub main {
+	&checkDeploymentValidity;
 	&processArguments;
 }
 
@@ -116,6 +118,13 @@ sub runPostflightScript {
 
 ## INSTALL AND DEPLOY
 
+sub checkDeploymentValidity {
+	if ($thisScript eq "-e"){
+		die "It appears that this was deployed over the internet and not configured to handle this circumstance. Please see documentation at https://github.com/mredig/GitAutoUpdate\n";
+	}
+
+}
+
 sub printIntro {
 	my $prompt;
 	if ($projectName ne "") {
@@ -183,6 +192,11 @@ sub deriveProjectName {
 }
 
 sub deployCleanup {
+	my $execname = &getExecutableName;
+	if ($execname eq "-e"){
+		return;
+	}
+
 	my $fullExecPath = "$execDir/$thisScript";
 	my $delete = &checkYn("Delete installer '$fullExecPath'?");
 	if ($delete && $debug == 0) {
