@@ -2,15 +2,21 @@
 use Cwd 'abs_path';
 use File::Basename;
 
+## GitAutoUpdate
+## Copyright 2017 Michael Redig
+## LICENSE: https://github.com/mredig/GitAutoUpdate/blob/master/LICENSE.md
+
+## deployment set
 $debug = 0;
 $originRepo = "";
 $cronTimer = "r0-59 * * * *"; ## r0-59 means random 0-59
 $preflightScript = "./Scripts/preflight"; #script that will run prior to checking for updates (note the relative location)
 $postflightScript = "./Scripts/postflight"; #script that will run after checking for updates
+$thisScript = &getExecutableName; #only change for special deployment needs
+
 
 ## dynamic
 $projectName = "";
-$thisScript = &getExecutableName;
 $execDir = &getExecutableDirectory;
 $ENV{'PATH'} .= ":/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin";
 
@@ -32,8 +38,14 @@ sub processArguments {
 		}
 	}
 	if ($processedArgument == 0) {
-		die "Usage: $thisScript [options]\n";
+		my $install = &checkyN("No arguments supplied. Would you like to run the install?");
+		if ($install) {
+			$processedArguments{'install'} = 1;
+		} else {
+			die "Usage: $thisScript [options]\nOPTIONS:\n\t-i install the software\n\t-u upgrade the repository\n\t-d debug mode - won't make any permanent changes and increases verbosity\n\n";
+		}
 	}
+
 	if ($processedArguments{'debug'} == 1) {
 		$debug = 1;
 	}
@@ -199,6 +211,11 @@ sub getExecutableDirectory {
 
 sub getExecutableName {
 	my $name = basename($0);
+
+	if ($name eq "-e"){
+		die "It appears that this was deployed over the internet and not configured to handle this circumstance. Please see documentation at https://github.com/mredig/GitAutoUpdate\n";
+	}
+
 	return $name;
 }
 
