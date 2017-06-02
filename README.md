@@ -30,10 +30,11 @@ You can view a working example with my [autoUpdateTest](https://github.com/mredi
 
 #### TODO
 
-* customize scripts paths
 * uninstaller
 	* remove/comment cron entry
 	* invoke a cleanup script
 * allow installation without arguments
 	* would allow for deploying via `perl -e "$(curl -fsSL https://raw.githubusercontent.com/mredig/autoUpdateTest/master/autoUpdater)"`
 * might wanna reset to HEAD? before updating?
+* update logs
+	* provide a variable to set a path to save a log to

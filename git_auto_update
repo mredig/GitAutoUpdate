@@ -5,6 +5,8 @@ use File::Basename;
 $debug = 0;
 $originRepo = "";
 $cronTimer = "r0-59 * * * *"; ## r0-59 means random 0-59
+$preflightScript = "./Scripts/preflight"; #script that will run prior to checking for updates (note the relative location)
+$postflightScript = "./Scripts/postflight"; #script that will run after checking for updates
 
 ## dynamic
 $projectName = "";
@@ -81,8 +83,8 @@ sub chdirToRepo {
 }
 
 sub runPreflightScript {
-	if (-e "Scripts/preflight") {
-		my $fullPreflightPath = abs_path("./Scripts/preflight");
+	if (-e $preflightScript) {
+		my $fullPreflightPath = abs_path($preflightScript);
 		&runOnSystem($fullPreflightPath);
 	}
 }
@@ -94,8 +96,8 @@ sub gitPull {
 }
 
 sub runPostflightScript {
-	if (-e "Scripts/postflight") {
-		my $fullPostflightPath = abs_path("./Scripts/postflight");
+	if (-e $postflightScript) {
+		my $fullPostflightPath = abs_path($postflightScript);
 		&runOnSystem($fullPostflightPath);
 	}
 }
