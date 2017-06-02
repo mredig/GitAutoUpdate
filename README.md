@@ -22,6 +22,8 @@ You can view a working example with my [autoUpdateTest](https://github.com/mredi
 	1. `postflight` script will be run every time after an update is checked or performed
 		* upon updating, it will run the new `postflight` script
 1. To update `git_auto_update`, save the customized variables at the top of the script
+1. If you need to uninstall, run `git_auto_update --uninstall`. It will disable the cron entry triggering updates and invoke the uninstall script, if you desire to perform any further actions beyond deactivating the autoupdate.
+
 
 
 ### Customized Deployment
@@ -42,11 +44,6 @@ So, if you name the script `git_auto_update` it would read `$thisScript = "git_a
 
 #### TODO
 
-* uninstaller
-	* remove/comment cron entry
-	* invoke a cleanup script
-* allow installation without arguments
-	* would allow for deploying via `perl -e "$(curl -fsSL https://raw.githubusercontent.com/mredig/autoUpdateTest/master/autoUpdater)"`
 * might wanna reset to HEAD? before updating?
 * update logs
 	* provide a variable to set a path to save a log to

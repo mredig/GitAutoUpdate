@@ -33,7 +33,7 @@ sub processArguments {
 	my %processedArguments;
 	for (my $i = 0; $i < scalar(@ARGV); $i++) {
 		my $arg = $ARGV[$i];
-		if ($arg =~ /^-(\w)/) {
+		if ($arg =~ /^-(-?\w+)/) {
 			$arg = $1;
 			my ($key, $value) = &processArgument($arg, $ARGV[$i + 1]);
 			$processedArguments{$key} = $value;
@@ -66,7 +66,12 @@ sub processArguments {
 		&runPreflightScript;
 		&gitPull;
 		&runPostflightScript;
+	} elsif ($processedArguments{'uninstall'} == 1) {
+		## run uninstall here
+		&uninstallConfirm;
 	}
+
+
 }
 
 sub processArgument {
@@ -85,6 +90,11 @@ sub processArgument {
 		$processedArgument = 1;
 		print "Install/Deploy mode\n";
 		$key = "install";
+		$value = 1;
+	} elsif ($arg eq "-uninstall") {
+		$processedArgument = 1;
+		print "Uninstall mode\n";
+		$key = "uninstall";
 		$value = 1;
 	}
 	return ($key, $value);
@@ -204,6 +214,47 @@ sub deployCleanup {
 	}
 
 }
+
+## uninstall
+
+sub uninstallConfirm {
+	my $uninstall = &checkyN("Are you sure you want to uninstall?");
+	if ($uninstall) {
+		&chdirToRepo;
+		&removeCron;
+		&runUninstallScript;
+	} else {
+		die "Wow! Be more careful when typing! Jeeze.\n";
+	}
+
+}
+
+sub removeCron {
+	my @previousCron = `crontab -l`;
+
+	my $execPath = $execDir . "/$thisScript";
+	my $newCron;
+	foreach my $cronEntry (@previousCron) {
+		$cronEntry =~ s/^(.*$execPath -u.*)$/#\t$1\t## disabled cron entry from uninstall. safe to delete./;
+		$newCron .= $cronEntry;
+	}
+
+	open my $cronFH, "| crontab -" or die "can't open crontab: $!"; ## reference: https://stackoverflow.com/questions/18133498/how-to-use-perl-to-modify-crontab
+	print $cronFH "$newCron";
+	close $cronFH;
+}
+
+sub runUninstallScript {
+	if (-e $uninstallScript) {
+		my $fullScriptPath = abs_path($uninstallScript);
+		&runOnSystem($fullScriptPath);
+		print "Autoupdater turned off and uninstall script run. You may want to check on the crontab and clean up the disabled entry. Thank you for using GitAutoUpdate!\n";
+	} else {
+		print "No uninstall script found. Autoupdater turned off, but if necessary, please perform any manual cleanup required. You may want to check on the crontab and clean up the disabled entry. Thank you for using GitAutoUpdate!\n";
+	}
+}
+
+
 
 ## support subroutines
 
