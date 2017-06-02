@@ -1,8 +1,14 @@
 # README
 
+Allows for using git as a deployment and auto update tool. Assuming your package is self contained within the git repository, it should be a fairly straight forward addition to your repository. It will automatically utilize the security and validity of `https` (use `ssh` at your own risk - see below) built into git!
+
+You can view a working example with my [autoUpdateTest](https://github.com/mredig/autoUpdateTest) (which doubles as my testing grounds for debugging).
+
+
 ### Usage
 
 1. Copy `git_auto_update` into your repository
+	* you can rename it to something more suitable to your repository (but don't change it once deployed! cron won't know what to do!)
 1. Edit your copy's first variables and enter your repo location and cron timer for updates
 	* use `https` for security over `ssh` (if client gets compromised, ssh could allow access for hackers to server and even worse, could then compromise the main repo)
 	* conforms to cron's rules, but adds the ability to randomize values:
@@ -14,9 +20,20 @@
 1. In *your* repository, you can include a `Scripts` folder with pre and postflight scripts named `preflight` and `postflight`
 	1. `preflight` script will be run every time before an update is checked or performed
 	1. `postflight` script will be run every time after an update is checked or performed
-		* upon updating, it SHOULD run the new `postflight` script if any changes were made (untested)
+		* upon updating, it will run the new `postflight` script
+1. To update `git_auto_update`, save the customized variables at the top of the script
 
 #### Notes:
 * This script assumes your repo conforms to the typical git naming scheme of `[protocol][server][path][reponame].git`
-* updating is not yet implemented, so for now this is an overpowered `git clone` command
-* don't forget that pre and postflight scripts must be executable!
+* don't forget that pre and postflight scripts must be executable! (that cause me a bit of a headache during my testing!)
+
+
+#### TODO
+
+* customize scripts paths
+* uninstaller
+	* remove/comment cron entry
+	* invoke a cleanup script
+* allow installation without arguments
+	* would allow for deploying via `perl -e "$(curl -fsSL https://raw.githubusercontent.com/mredig/autoUpdateTest/master/autoUpdater)"`
+* might wanna reset to HEAD? before updating?

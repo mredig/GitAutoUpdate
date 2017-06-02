@@ -30,7 +30,7 @@ sub processArguments {
 		}
 	}
 	if ($processedArgument == 0) {
-		die "Usage: git_auto_update [options]\n";
+		die "Usage: $thisScript [options]\n";
 	}
 	if ($processedArguments{'debug'} == 1) {
 		$debug = 1;
@@ -134,7 +134,7 @@ sub cloneGit {
 
 sub setupUpdateChecks {
 	my $newCron = &calculateCronTimer;
-	my $cronEntry = "$newCron $execDir/$projectName/$thisScript -u"; #command that goes into cron
+	my $cronEntry = "$newCron $execDir/$projectName/$thisScript -u >/dev/null 2>&1"; #command that goes into cron
 	my $previousCron = `crontab -l`;
 	my $newCron = "$previousCron\n$cronEntry\n";
 	print "$cronSetCommand\n";
