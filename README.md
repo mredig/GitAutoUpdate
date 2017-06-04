@@ -40,6 +40,7 @@ So, if you name the script `git_auto_update` it would read `$thisScript = "git_a
 #### Notes:
 * This script assumes your repo conforms to the typical git naming scheme of `[protocol][server][path][reponame].git`
 * don't forget that pre and postflight scripts must be executable! (that cause me a bit of a headache during my testing!)
+* this is NOT meant for bidirectional syncing - any changes made to the deployed repository could cause merge conflicts down the road! if you need anything customized per client you deploy to, I would suggest adding the file(s) to the `.gitignore` file from the deployment server. (providing a sample config file in the repo might be a good idea though)
 
 
 #### TODO
